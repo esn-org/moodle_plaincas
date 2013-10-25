@@ -15,16 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details
+ * Version information
  *
  * @package    auth
- * @subpackage plaincas
- * @author     Fabian Bircher
+ * @subpackage moocas
+ * @copyright  2013 Mohammed Nassar
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+//defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2013041800;        // The current plugin version (Date: YYYYMMDDXX)
+$plugin->version   = 2013101006;        // The current plugin version (Date: YYYYMMDDXX)
 $plugin->requires  = 2012112900;        // Requires this Moodle version
-$plugin->component = 'auth_plaincas';        // Full name of the plugin (used for diagnostics)
+$plugin->component = 'auth_moocas';     // Full name of the plugin (used for diagnostics)

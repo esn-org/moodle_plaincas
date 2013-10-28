@@ -16,23 +16,23 @@ if (!defined('MOODLE_INTERNAL')) {
 }
 
 require_once($CFG->libdir.'/authlib.php'); //This library defines the auth_plugin_base class that is the basis for any new authentication module for moodle. 
-require_once($CFG->dirroot.'/auth/moocas/include/CAS-1.3.2/CAS.php'); // Load the CAS lib
+require_once($CFG->dirroot.'/auth/plaincas/include/CAS-1.3.2/CAS.php'); // Load the CAS lib
 
 /**
  * Plugin for no authentication.
  */
-class auth_plugin_moocas extends auth_plugin_base {
+class auth_plugin_plaincas extends auth_plugin_base {
 
     var $_userInfo = array();
 
     /**
      * Constructor.
      */
-    function auth_plugin_moocas() {
+    function auth_plugin_plaincas() {
 
-        $this->authtype = 'moocas'; 
-        $this->roleauth = 'auth_moocas';
-        $this->errorlogtag = '[AUTH MOOCAS] ';
+        $this->authtype = 'plaincas'; 
+        $this->roleauth = 'auth_plaincas';
+        $this->errorlogtag = '[AUTH PLAINCAS] ';
         $this->pluginconfig = 'auth/'.$this->authtype;
 
         $this->config = get_config($this->pluginconfig);
@@ -104,8 +104,18 @@ class auth_plugin_moocas extends auth_plugin_base {
     function loginpage_hook() {
        
        //return false;    
-        global $CFG, $DB, $USER, $SESSION, $OUTPUT, $PAGE;
+        global $CFG, $DB, $USER, $SESSION, $OUTPUT, $PAGE, $frm;
         $site = get_site();
+        $PlainCASform = get_string('PlainCASform', 'auth_plaincas');
+        $username = optional_param('username', '', PARAM_RAW);
+
+        if (!empty($username)) {
+            if (isset($SESSION->wantsurl) && (strstr($SESSION->wantsurl, 'ticket') ||
+                                              strstr($SESSION->wantsurl, 'manual'))) {
+                unset($SESSION->wantsurl);
+            }
+            return;
+        }
 
         // Return if CAS enabled and settings not specified yet
         if (empty($this->config->hostname)) {
@@ -114,17 +124,43 @@ class auth_plugin_moocas extends auth_plugin_base {
 
         $this->CAS_connect();
 
-        /*if ($authParam == 'CAS') {
-             if (!phpCAS::checkAuthentication()) {
-                phpCAS::forceAuthentication();
-            }
-        }*/
+        if (phpCAS::checkAuthentication()) {
+            $frm->username = phpCAS::getUser();
+            $frm->password = 'passwdCas';
+            return;
+        }
 
-        // force CAS authentication
-        phpCAS::forceAuthentication();
+        if (isset($_GET['loginguest']) && ($_GET['loginguest'] == true)) {
+            $frm->username = 'guest';
+            $frm->password = 'guest';
+            return;
+        }
+
+        if ($this->config->multiauth) {
+
+            $authCAS = optional_param('authParam', '', PARAM_RAW);;
+            if ($authCAS == 'manual') {
+                return;
+            }
+
+            if ($authCAS != 'plaincas'){
+                $PAGE->set_url('/login/index.php');
+                $PAGE->navbar->add($PlainCASform);
+                $PAGE->set_title("$site->fullname: $PlainCASform");
+                $PAGE->set_heading($site->fullname);
+                echo $OUTPUT->header();
+                include($CFG->dirroot.'/auth/plaincas/plaincas_form.html');
+                echo $OUTPUT->footer();
+                exit();
+            }
+        }
+
         $username = '';
 
-        if (phpCAS::checkAuthentication()) {
+        if (!phpCAS::isAuthenticated()) {
+            // force CAS authentication
+            phpCAS::forceAuthentication();
+
             $key = sesskey();
 
             if (phpCAS::isAuthenticated() || phpCAS::checkAuthentication()){
@@ -159,6 +195,7 @@ class auth_plugin_moocas extends auth_plugin_base {
             return false;
         }
     }
+
 
     /**
      * Logout from the CAS
@@ -197,9 +234,6 @@ class auth_plugin_moocas extends auth_plugin_base {
                 phpCAS::setNoCasServerValidation();
             }
 
-            // force CAS authentication
-            //phpCAS::forceAuthentication();
-
             return true;
    
         } else {
@@ -218,7 +252,7 @@ class auth_plugin_moocas extends auth_plugin_base {
     function config_form($config, $err, $user_fields) {
         global $CFG;
 
-        include($CFG->dirroot.'/auth/moocas/config.html');
+        include($CFG->dirroot.'/auth/plaincas/config.html');
     }
 
     /**
@@ -230,7 +264,7 @@ class auth_plugin_moocas extends auth_plugin_base {
     function validate_form($form, &$err) {
         $certificate_path = trim($form->certificate_path);
         if ($form->certificate_check && empty($certificate_path)) {
-            $err['certificate_path'] = get_string('auth_moocas_certificate_path_empty', 'auth_moocas');
+            $err['certificate_path'] = get_string('auth_plaincas_certificate_path_empty', 'auth_plaincas');
         }
     }
 
@@ -254,6 +288,9 @@ class auth_plugin_moocas extends auth_plugin_base {
         }
         if (!isset($config->logoutcas)) {
             $config->logoutcas = '';
+        }
+        if (!isset($config->multiauth)) {
+            $config->multiauth = '';
         }
         if (!isset($config->certificate_check)) {
             $config->certificate_check = '';
@@ -282,6 +319,7 @@ class auth_plugin_moocas extends auth_plugin_base {
         set_config('casversion', $config->casversion, $this->pluginconfig);
         set_config('baseuri', trim($config->baseuri), $this->pluginconfig);
         set_config('logoutcas', $config->logoutcas, $this->pluginconfig);
+        set_config('multiauth', $config->multiauth, $this->pluginconfig);
         set_config('certificate_check', $config->certificate_check, $this->pluginconfig);
         set_config('certificate_path', $config->certificate_path, $this->pluginconfig);
         set_config('logout_return_url', $config->logout_return_url, $this->pluginconfig);
@@ -370,6 +408,7 @@ class auth_plugin_moocas extends auth_plugin_base {
 
         return $moodleattributes;
     }
+
 
     /**
      * Cleans and returns first of potential many values (multi-valued attributes)

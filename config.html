@@ -22,6 +22,9 @@ if (!isset ($config->certificate_path)) {
 if (!isset ($config->logoutcas)) {
     $config->logoutcas = '';
 }
+if (!isset ($config->multiauth)) {
+    $config->multiauth = '';
+}
 if (!isset($config->logout_return_url)) {
     $config->logout_return_url = '';
 }
@@ -44,54 +47,54 @@ $yesno = array( get_string('no'), get_string('yes') );
 <table cellspacing="0" cellpadding="5" border="0">
 <tr>
     <td colspan="2">
-        <h4><?php print_string('auth_moocas_server_settings', 'auth_moocas') ?></h4>
+        <h4><?php print_string('auth_plaincas_server_settings', 'auth_plaincas') ?></h4>
     </td>
 </tr>
 
 <!--Hostname-->
 <tr valign="top" class="required">
-    <td align="right"><label for="hostname"><?php print_string('auth_moocas_hostname_key', 'auth_moocas') ?>: </label></td>
+    <td align="right"><label for="hostname"><?php print_string('auth_plaincas_hostname_key', 'auth_plaincas') ?>: </label></td>
     <td>
         <input name="hostname" id="hostname" type="text" size="30" value="<?php echo $config->hostname ?>" />
         <?php if (isset($err['hostname'])) { echo $OUTPUT->error_text($err['hostname']); } ?>
     </td>
     <td>
-        <?php print_string('auth_moocas_hostname', 'auth_moocas') ?>
+        <?php print_string('auth_plaincas_hostname', 'auth_plaincas') ?>
     </td>
 </tr>
 
 <!--baseuri-->
 <tr valign="top" class="required">
     <td align="right">
-        <label for="baseuri"><?php print_string('auth_moocas_baseuri_key', 'auth_moocas') ?>: </label>
+        <label for="baseuri"><?php print_string('auth_plaincas_baseuri_key', 'auth_plaincas') ?>: </label>
     </td>
     <td>
         <input name="baseuri" id="baseuri" type="text" size="30" value="<?php echo $config->baseuri ?>" />
         <?php if (isset($err['baseuri'])) { echo $OUTPUT->error_text($err['baseuri']); } ?>
     </td>
     <td>
-        <?php print_string('auth_moocas_baseuri', 'auth_moocas') ?>
+        <?php print_string('auth_plaincas_baseuri', 'auth_plaincas') ?>
     </td>
 </tr>
 
 <!--port-->
 <tr valign="top" class="required">
     <td align="right">
-        <label for="port"><?php print_string('auth_moocas_port_key', 'auth_moocas') ?>: </label>
+        <label for="port"><?php print_string('auth_plaincas_port_key', 'auth_plaincas') ?>: </label>
     </td>
     <td>
         <input name="port" id="port" type="text" size="30" value="<?php echo $config->port ?>" />
         <?php if (isset($err['port'])) { echo $OUTPUT->error_text($err['port']); } ?>
     </td>
     <td>
-        <?php print_string('auth_moocas_port', 'auth_moocas') ?>
+        <?php print_string('auth_plaincas_port', 'auth_plaincas') ?>
     </td>
 </tr>
 
 <!--xxx-->
 <tr valign="top" class="required">
     <td align="right">
-        <?php echo html_writer::label(get_string('auth_moocas_casversion', 'auth_moocas'), 'menucasversion'); ?>:
+        <?php echo html_writer::label(get_string('auth_plaincas_casversion', 'auth_plaincas'), 'menucasversion'); ?>:
     </td>
     <td>
         <?php
@@ -103,53 +106,64 @@ $yesno = array( get_string('no'), get_string('yes') );
         ?>
     </td>
     <td>
-        <?php print_string('auth_moocas_version', 'auth_moocas') ?>
+        <?php print_string('auth_plaincas_version', 'auth_plaincas') ?>
     </td>
 </tr>
 
 <!--certificate_check-->
 <tr valign="top"  class="required">
-    <td align="right"><?php echo html_writer::label(get_string('auth_moocas_certificate_check_key', 'auth_moocas'), 'menucertificate_check'); ?>:</td>
+    <td align="right"><?php echo html_writer::label(get_string('auth_plaincas_certificate_check_key', 'auth_plaincas'), 'menucertificate_check'); ?>:</td>
     <td>
         <?php echo html_writer::select($yesno, 'certificate_check', $config->certificate_check, false); ?>
     </td>
     <td>
-        <?php print_string('auth_moocas_certificate_check', 'auth_moocas') ?>
+        <?php print_string('auth_plaincas_certificate_check', 'auth_plaincas') ?>
     </td>
 </tr>
 
 <!--certificate_path-->
 <tr valign="top" class="required">
-    <td align="right"><label for="certificate_path"><?php print_string('auth_moocas_certificate_path_key', 'auth_moocas') ?>: </label></td>
+    <td align="right"><label for="certificate_path"><?php print_string('auth_plaincas_certificate_path_key', 'auth_plaincas') ?>: </label></td>
     <td>
         <input name="certificate_path" id="certificate_path" type="text" size="30" value="<?php echo $config->certificate_path ?>" />
         <?php if (isset($err['certificate_path'])) echo $OUTPUT->error_text($err['certificate_path']); ?>
     </td>
     <td>
-        <?php print_string('auth_moocas_certificate_path', 'auth_moocas') ?>
+        <?php print_string('auth_plaincas_certificate_path', 'auth_plaincas') ?>
     </td>
 </tr>
 
-<!--auth_cas_logoutcas-->
+<!--auth_plaincas_logoutcas-->
 <tr valign="top" class="required">
-    <td align="right"><?php echo html_writer::label(get_string('auth_moocas_logoutcas_key', 'auth_moocas'), 'menulogoutcas'); ?>:</td>
+    <td align="right"><?php echo html_writer::label(get_string('auth_plaincas_logoutcas_key', 'auth_plaincas'), 'menulogoutcas'); ?>:</td>
     <td>
         <?php echo html_writer::select($yesno, 'logoutcas', $config->logoutcas, false); ?>
     </td>
     <td>
-        <?php print_string('auth_moocas_logoutcas', 'auth_moocas') ?>
+        <?php print_string('auth_plaincas_logoutcas', 'auth_plaincas') ?>
+    </td>
+</tr>
+
+<!--auth_plaincas_multiauth-->
+<tr valign="top" class="required">
+    <td align="right"><?php echo html_writer::label(get_string('auth_plaincas_multiauth_key', 'auth_plaincas'), 'menumultiauth'); ?>:</td>
+    <td>
+        <?php echo html_writer::select($yesno, 'multiauth', $config->multiauth, false); ?>
+    </td>
+    <td>
+        <?php print_string('auth_plaincas_multiauth', 'auth_plaincas') ?>
     </td>
 </tr>
 
 <!--logout_return_url-->
 <tr valign="top" class="required">
-    <td align="right"><?php print_string('auth_moocas_logout_return_url_key', 'auth_moocas') ?>:</td>
+    <td align="right"><?php print_string('auth_plaincas_logout_return_url_key', 'auth_plaincas') ?>:</td>
     <td>
        <input name="logout_return_url" type="text" size="30" value="<?php echo $config->logout_return_url ?>" />
        <?php if (isset($err['logout_return_url'])) { echo $OUTPUT->error_text($err['logout_return_url']); } ?>
     </td>
     <td>
-        <?php print_string('auth_moocas_logout_return_url', 'auth_moocas') ?>
+        <?php print_string('auth_plaincas_logout_return_url', 'auth_plaincas') ?>
     </td>
 </tr>
 
@@ -157,7 +171,7 @@ $yesno = array( get_string('no'), get_string('yes') );
 <!--CAS Roles-->
 <tr>
     <td colspan="2">
-        <h4><?php print_string('auth_moocas_roles_settings', 'auth_moocas') ?></h4>
+        <h4><?php print_string('auth_plaincas_roles_settings', 'auth_plaincas') ?></h4>
     </td>
 </tr>
 
@@ -180,7 +194,7 @@ if($roles){
 
 <?php
 $help = '<hr />';
-$help .= get_string('auth_mapdata_help', 'auth_moocas');
+$help .= get_string('auth_mapdata_help', 'auth_plaincas');
 
 print_auth_lock_options($this->authtype, $user_fields, $help, true, false);
 ?>

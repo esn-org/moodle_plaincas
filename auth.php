@@ -95,7 +95,7 @@ class auth_plugin_plaincas extends auth_plugin_base {
     * @return bool
     */
     function can_edit_profile() {
-        return true;
+        return false;
     }
 
     /**
@@ -301,6 +301,9 @@ class auth_plugin_plaincas extends auth_plugin_base {
         if (!isset($config->logout_return_url)) {
             $config->logout_return_url = '';
         }
+        if (!isset($config->roles_attribute)) {
+            $config->roles_attribute = '';
+        }
 
         // CAS Roles settings
         $roles = get_all_roles();
@@ -323,6 +326,7 @@ class auth_plugin_plaincas extends auth_plugin_base {
         set_config('certificate_check', $config->certificate_check, $this->pluginconfig);
         set_config('certificate_path', $config->certificate_path, $this->pluginconfig);
         set_config('logout_return_url', $config->logout_return_url, $this->pluginconfig);
+        set_config('roles_attribute', $config->roles_attribute, $this->pluginconfig);
 
         if($roles){
             foreach($roles as $role){
@@ -522,7 +526,8 @@ class auth_plugin_plaincas extends auth_plugin_base {
     */
     function _setCASGroups () {
         if( phpCAS::checkAuthentication() ) {
-          $attributes = $this->get_role_attributes(phpCAS::getAttributes());
+          //$attributes = $this->get_role_attributes(phpCAS::getAttributes());
+          $attributes = $this->assembledRoles();
           if (!is_array($attributes)) {
             $attributes = array($attributes);
           }
@@ -552,13 +557,13 @@ class auth_plugin_plaincas extends auth_plugin_base {
     *
     * @author  Fabian Bircher
     */
-    function get_role_attributes( $attributes ){
+    /*function get_role_attributes( $attributes ){
         if (is_array($attributes['roles'])) {
             return $attributes['roles'];
         } else {
             return array($attributes['roles']);
         }
-    }
+    }*/
 
 
     function get_role_patterns() {
@@ -595,6 +600,64 @@ class auth_plugin_plaincas extends auth_plugin_base {
         $roles = get_user_roles($context, $userid, true);
         
         return $roles;
+    }
+
+    /**
+    * Scan and Return attributes for the roles in an array
+    */
+    function scanRolesAttributes () {
+        $att_roles = $this->config->roles_attribute;
+        if(isset($att_roles)){
+            preg_match_all("/\[(.*)\]/U", $att_roles, $attArray);
+            return $attArray;
+        }
+    }
+
+    /*
+    * Return the required attributes for the roles from CAS
+    */
+    function getRolesRequiredAttrs() {
+        $requiredRolesAttr = array();
+        $scanRolesAttr = $this->scanRolesAttributes();
+
+        foreach($scanRolesAttr[1] as $key => $value){//"sc"
+            $tmp = phpCAS::getAttributes();
+            foreach ($scanRolesAttr[0] as $sytakyKey => $sytakyValue) {//"[sc]"
+                if($key == $sytakyKey) {
+                    if (isset($tmp[$value])) {
+                        $tmp = $tmp[$value];
+                    }
+                $requiredRolesAttr[$sytakyValue] = $tmp;
+                }
+            }
+        }
+
+        return $requiredRolesAttr;
+    }
+
+    /*
+    * Assemble the roles and return the assembled roles
+    */
+    function assembledRoles() {
+        $roleAttrArr = array($this->config->roles_attribute);
+        $requiredRolesAttr = $this->getRolesRequiredAttrs();
+
+        foreach ($requiredRolesAttr as $sytakyKey => $AttrValue) {
+            foreach ($roleAttrArr as $key => $roleAttrValue) {
+                $new_role = array();
+                if (!is_array($AttrValue)) {
+                    $new_role[] = str_replace($sytakyKey, $AttrValue, $roleAttrValue);
+                } else {
+                    foreach ($AttrValue as $AttrValue) {
+                        $new_role[] = str_replace($sytakyKey, $AttrValue, $roleAttrValue);
+                    }
+                }
+                unset($roleAttrArr[$key]);
+                $roleAttrArr = array_merge($roleAttrArr, $new_role);
+            }
+        }
+
+        return $roleAttrArr;
     }
 
 

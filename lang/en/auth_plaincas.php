@@ -56,7 +56,10 @@ $string['auth_plaincas_server_settings'] = 'CAS server configuration';
 //$string['auth_moocas_text'] = 'Secure connection';
 //$string['auth_moocas_use_cas'] = 'Use CAS';
 $string['auth_plaincas_version'] = 'CAS protocol version to use';
-//$string['MooCASform'] = 'Authentication choice';
+$string['PlainCASform'] = 'Authentication choice';
+
 $string['auth_mapdata_help'] = 'Do the mapping...';
 $string['auth_plaincas_roles_settings'] = 'CAS Roles Settings';
-$string['PlainCASform'] = 'Authentication choice';
+$string['auth_plaincas_roles_mappings_key'] = 'CAS Roles mappings';
+$string['auth_palinca_roles_attribute_key'] = 'Attribute for roles';
+$string['auth_palinca_roles_attribute'] = 'Attributes may be arrays. Example: [role]-[casAttri]';
